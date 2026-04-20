@@ -2,38 +2,33 @@ pipeline {
     agent any
 
     environment {
-        SONAR_HOST_URL = 'http://sonarqube:9000'
-        // 'sonar-token' is a Jenkins credential — store your token there
+        SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
 
         stage('Checkout') {
-           stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/sonar-pipeline-project.git'
+                git branch: 'main', url: 'https://github.com/harshitachabaria24/sonar-pipeline-project.git'
             }
         }
 
-
-	stage('SonarQube Analysis') {
-    		 steps {
-        withSonarQubeEnv('SonarQube') {
-            bat """
-            mvn clean verify sonar:sonar ^
-            -Dsonar.projectKey=sonar-pipeline-project ^
-            -Dsonar.host.url=http://localhost:9000 ^
-            -Dsonar.login=%SONAR_TOKEN%
-            """
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    bat """
+                    mvn clean verify sonar:sonar ^
+                    -Dsonar.projectKey=sonar-pipeline-project ^
+                    -Dsonar.host.url=http://localhost:9000 ^
+                    -Dsonar.login=%SONAR_TOKEN%
+                    """
+                }
+            }
         }
-    		}
-	}
 
         stage('Quality Gate') {
             steps {
-                // Wait for SonarQube to finish processing the report.
-                // If the Quality Gate fails, the pipeline stops here.
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -42,15 +37,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Only runs if Quality Gate passed
-                sh 'mvn package'
+                bat 'mvn clean package'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'docker build -t sample-app .'
-                sh 'docker run -d -p 8080:8080 sample-app'
+                bat 'docker build -t sample-app .'
+                bat 'docker run -d -p 8080:8080 sample-app'
             }
         }
     }
