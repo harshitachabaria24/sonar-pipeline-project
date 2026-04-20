@@ -18,7 +18,8 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     bat """
-                    mvn clean verify sonar:sonar ^
+                    cd sample-java-app ^
+                    && mvn clean verify sonar:sonar ^
                     -Dsonar.projectKey=sonar-pipeline-project ^
                     -Dsonar.host.url=http://localhost:9000 ^
                     -Dsonar.login=%SONAR_TOKEN%
@@ -37,7 +38,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'mvn clean package'
+                bat 'cd sample-java-app && mvn clean package'
             }
         }
 
