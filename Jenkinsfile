@@ -18,16 +18,15 @@ pipeline {
 
 
 	stage('SonarQube Analysis') {
-    		steps {
-        		// This injects SonarQube server URL + authentication token
-        		withSonarQubeEnv('SonarQube') {
-
- 		        // mvn = Maven tool (used mainly for Java projects)
-            		// clean = remove old build files
-            		// verify = compile code + run tests
-            		// sonar:sonar = send analysis report to SonarQube server
-            		sh 'mvn clean verify sonar:sonar'
-			}
+    		 steps {
+        withSonarQubeEnv('SonarQube') {
+            bat """
+            mvn clean verify sonar:sonar ^
+            -Dsonar.projectKey=sonar-pipeline-project ^
+            -Dsonar.host.url=http://localhost:9000 ^
+            -Dsonar.login=%SONAR_TOKEN%
+            """
+        }
     		}
 	}
 
